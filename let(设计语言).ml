@@ -6,7 +6,7 @@ and exp =
   | Mins of exp * exp
   | Mult of exp * exp
   | Div of exp * exp
-  | Iszero of exp * exp
+  | Iszero of exp
   | If of exp * exp * exp
   | Let of string * exp * exp
   | Read;;
@@ -47,7 +47,8 @@ module Env2 = struct
   let lookup x e = e x
   let add (x,v) e = 
     fun y -> if x=y then v else e y
-end;;
+end
+exception TypeError of string
 
 let rec binop op env e1 e2=
   let v1 = eval env e1 in
@@ -56,7 +57,7 @@ let rec binop op env e1 e2=
     match v1, v2 with 
       | VInt n1, VInt n2 -> VInt (op n1 n2)
       | VBool _, _
-      | _,VBool _-> raise (Failure "add:type error ")
+      | _,VBool _-> raise (TypeError "binop")
     end
         
 and eval : Env.t -> exp -> value
@@ -68,4 +69,22 @@ and eval : Env.t -> exp -> value
     | Mins(e1, e2) -> binop (fun x y-> x-y) env e1 e2
     | Mult(e1, e2) -> binop (fun x y-> x*y) env e1 e2
     | Div(e1, e2) -> binop (fun x y-> x/y) env e1 e2
-        ;;
+    | Read -> VInt (read_int ())
+    | Iszero e->
+      begin
+        match eval env e with
+          | VBool _-> raise (TypeError "iszero")
+          | VInt n -> VBool(n=0)
+      end
+    | If (e1,e2,e3)->
+      begin
+        match eval env e1 with
+          | VBool true -> eval env e2
+          | VBool false -> eval env e3
+          | _-> raise (TypeError "if")
+      end
+    | Let (x,e1,e2) ->
+      let v1= eval env e1 in 
+         eval (Env.add (x, v1) env) e2
+  let interpret: program -> value
+  =fun pgm -> eval Env.empty pgm;;
