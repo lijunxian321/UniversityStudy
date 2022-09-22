@@ -76,6 +76,9 @@ and eval : Env.t -> exp -> value
     | Let (x,e1,e2) ->
       let v1= eval env e1 in 
          eval (Env.add (x, v1) env) e2
-  let interpret: program -> value
-  =fun pgm -> eval Env.empty pgm;;
-  
+
+let analyze_type : program -> bool
+=fun p -> true (*to do*)
+
+let interpret: program -> value
+=fun pgm -> eval Env.empty pgm;;
