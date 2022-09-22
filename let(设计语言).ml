@@ -48,3 +48,24 @@ module Env2 = struct
   let add (x,v) e = 
     fun y -> if x=y then v else e y
 end;;
+
+let rec binop op env e1 e2=
+  let v1 = eval env e1 in
+  let v2 = eval env e2 in
+    begin
+    match v1, v2 with 
+      | VInt n1, VInt n2 -> VInt (op n1 n2)
+      | VBool _, _
+      | _,VBool _-> raise (Failure "add:type error ")
+    end
+        
+and eval : Env.t -> exp -> value
+=fun env exp->
+  match exp with
+    | Int n -> VInt n
+    | Var x -> Env.lookup x env
+    | Plus (e1, e2) -> binop (fun x y-> x+y) env e1 e2
+    | Mins(e1, e2) -> binop (fun x y-> x-y) env e1 e2
+    | Mult(e1, e2) -> binop (fun x y-> x*y) env e1 e2
+    | Div(e1, e2) -> binop (fun x y-> x/y) env e1 e2
+        ;;
