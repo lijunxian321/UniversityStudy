@@ -46,5 +46,5 @@ module Env2 = struct
   let empty = fun x -> raise (Failure (x^ ":not bound "))
   let lookup x e = e x
   let add (x,v) e = 
-    fun y -> if x=y then v else e x
+    fun y -> if x=y then v else e y
 end;;
