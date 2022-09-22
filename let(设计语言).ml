@@ -9,25 +9,9 @@ and exp =
   | Iszero of exp
   | If of exp * exp * exp
   | Let of string * exp * exp
-  | Read;;
-let p1 = 
-  Let ("x", Int 1, 
-    Plus (Var "x",Int 2))
-let p2 =
-  Let ("x", Int 1,
-    Let ("y", Int 2,
-      Plus (Var "x", Var "y")))
-let p3=
-  Let ("x",Let("y",Int 2,
-            Plus (Var "y", Int 1)),
-    Plus (Var "x", Int 3))
-let p4=
-  Let ("x", Int 1,
-    Let ("x", Int 2,
-      Let ("x", Int 3,
-        Plus (Var "x", Var "y"))
-    )
-  )
+  | Read
+  | Print of exp;;
+      
 type value =
   | VInt of int
   | VBool of bool
@@ -70,6 +54,12 @@ and eval : Env.t -> exp -> value
     | Mult(e1, e2) -> binop (fun x y-> x*y) env e1 e2
     | Div(e1, e2) -> binop (fun x y-> x/y) env e1 e2
     | Read -> VInt (read_int ())
+    | Print e ->
+      begin
+        match eval env e with
+          | VInt n -> (print_endline (string_of_int n); VInt n)
+          | VBool b -> (print_endline (string_of_bool b); VBool b)
+      end
     | Iszero e->
       begin
         match eval env e with
@@ -88,3 +78,4 @@ and eval : Env.t -> exp -> value
          eval (Env.add (x, v1) env) e2
   let interpret: program -> value
   =fun pgm -> eval Env.empty pgm;;
+  
